@@ -1,11 +1,12 @@
+import os
 import sys
 import cv2
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
-    QLabel, QSlider, QRadioButton, QGridLayout, QFrame, QSizePolicy
+    QLabel, QSlider, QRadioButton, QGridLayout, QFrame,
 )
 from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QImage, QPixmap
+from PyQt6.QtGui import QImage, QPixmap, QIcon
 
 
 class RobotCarControlApp(QWidget):
@@ -33,6 +34,23 @@ class RobotCarControlApp(QWidget):
         self.down_button = QPushButton("↓")
         self.left_button = QPushButton("←")
         self.right_button = QPushButton("→")
+
+        # setings for the buttons
+        self.up_button.setFixedSize(60, 60)
+        self.down_button.setFixedSize(60, 60)
+        self.left_button.setFixedSize(60, 60)
+        self.right_button.setFixedSize(60, 60)
+
+        # set icons for the buttons up.png
+        self.up_button.setIconSize(self.up_button.size())
+        self.up_button.setIcon(QIcon(os.path.join(os.path.dirname(__file__), "up.png")))
+        self.down_button.setIconSize(self.down_button.size())
+        self.down_button.setIcon(QIcon(QIcon(os.path.join(os.path.dirname(__file__),"down.png"))))
+        self.left_button.setIconSize(self.left_button.size())
+        self.left_button.setIcon(QIcon(QIcon(os.path.join(os.path.dirname(__file__),"left.png"))))
+        self.right_button.setIconSize(self.right_button.size())
+        self.right_button.setIcon(QIcon(QIcon(os.path.join(os.path.dirname(__file__),"right.png"))))
+
         dpad_layout.addWidget(self.up_button, 0, 1)
         dpad_layout.addWidget(self.down_button, 2, 1)
         dpad_layout.addWidget(self.left_button, 1, 0)
@@ -79,71 +97,15 @@ class RobotCarControlApp(QWidget):
         self.setLayout(main_layout)
         self.setWindowTitle("Robot Car Control")
 
-        # Apply QSS Styles
-        self.setStyleSheet("""
-            QWidget {
-                background-color: #f4f4f4;
-                font-family: Arial, sans-serif;
-                font-size: 12pt;
-            }
-            
-            QFrame {
-                background-color: #ffffff;
-                border-radius: 10px;
-                border: 2px solid #ccc;
-                padding: 10px;
-            }
+        # Load QSS Stylesheet
+        self.load_stylesheet()
 
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                font-weight: bold;
-                padding: 5px;
-                border-radius: 5px;
-                margin: 5px;
-                border: none;
-                min-width: 60px;
-            }
-
-            QPushButton:hover {
-                background-color: #45a049;
-            }
-
-            QSlider::handle:horizontal {
-                background: #4CAF50;
-                border-radius: 5px;
-                width: 20px;
-            }
-
-            QSlider::groove:horizontal {
-                background: #ddd;
-                height: 5px;
-                border-radius: 5px;
-            }
-
-            QRadioButton {
-                font-weight: bold;
-                margin-top: 10px;
-            }
-
-            QLabel {
-                font-size: 16pt;
-                color: #333;
-                background-color: #f0f0f0;
-                border: 1px solid #ccc;
-                padding: 10px;
-                border-radius: 10px;
-            }
-
-            QGridLayout {
-                margin-top: 20px;
-                margin-bottom: 20px;
-            }
-
-            QVBoxLayout {
-                margin-top: 10px;
-            }
-        """)
+    def load_stylesheet(self):
+        try:
+            with open(os.path.join(os.path.dirname(__file__), "style.qss"), "r") as f:
+                self.setStyleSheet(f.read())
+        except FileNotFoundError:
+            print("QSS file not found. Using default styles.")
 
     def update_frame(self):
         ret, frame = self.capture.read()

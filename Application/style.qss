@@ -1,0 +1,83 @@
+/* Set the background color of the entire application */
+QWidget {
+    background-color: #FFFFFF;
+    color: #000000;
+}
+
+/* Set the color for buttons */
+QPushButton {
+    background-color: #FFFFFF;
+    color: #FFFFFF;
+}
+
+QPushButton:hover {
+    background-color: #333333;
+}
+
+QPushButton:pressed {
+    background-color: #666666;
+}
+
+/* Set the color for text fields */
+QLineEdit, QTextEdit {
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid #FFFFFF;
+}
+
+/* Set the color for labels */
+QLabel {
+    color: #FFFFFF;
+}
+
+/* Set the color for combo boxes */
+QComboBox {
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid #FFFFFF;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #000000;
+    color: #FFFFFF;
+    selection-background-color: #333333;
+}
+
+/* Set the color for progress bars */
+QProgressBar {
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid #FFFFFF;
+}
+
+QProgressBar::chunk {
+    background-color: #FFFFFF;
+}
+
+/* Set the color for checkboxes */
+QCheckBox {
+    color: #FFFFFF;
+}
+
+QCheckBox::indicator {
+    background-color: #000000;
+    border: 1px solid #FFFFFF;
+}
+
+QCheckBox::indicator:checked {
+    background-color: #FFFFFF;
+}
+
+/* Set the color for radio buttons */
+QRadioButton {
+    color: #FFFFFF;
+}
+
+QRadioButton::indicator {
+    background-color: #000000;
+    border: 1px solid #FFFFFF;
+}
+
+QRadioButton::indicator:checked {
+    background-color: #FFFFFF;
+}
