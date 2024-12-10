@@ -1,7 +1,27 @@
 import cv2
 import numpy as np
+import paho.mqtt.client as mqtt
+import json
+
+DISTANCE = 10
+SCALAR = 30
+BROKER = "192.168.18.29"  # Replace with your MQTT broker address
+PORT = 1883  # MQTT broker port
+TOPIC = "robot/control"
+
+def return_angle(cx, width):
+    x = (cx / width) * SCALAR
+    x = (SCALAR / 2) - x
+    angle = np.arctan(x / DISTANCE)
+    # Convert radians to degrees
+    angle = np.degrees(angle)
+    return angle
 
 def detect_red_dots_in_line():
+    # Initialize the MQTT client
+    client = mqtt.Client()
+    client.connect(BROKER, PORT, 60)
+
     # Initialize the webcam
     cap = cv2.VideoCapture(0)
 
@@ -59,6 +79,19 @@ def detect_red_dots_in_line():
                     # Print the coordinates
                     print(f"Red dot found at: ({cx}, {cy})")
 
+                    # Calculate angle
+                    angle = return_angle(cx, width)
+
+                    # Create JSON message
+                    message = json.dumps({"command": "SERVO", "angle": angle})
+
+                    # Publish the message to the MQTT broker
+                    client.publish(TOPIC, message)
+
+                    # Print the angle and MQTT message
+                    print(f"Angle: ({angle})")
+                    print(f"Published MQTT message: {message}")
+
         # Draw the ROI strip on the original frame for visualization
         cv2.rectangle(frame, (0, y_start), (width, y_end), (255, 0, 0), 2)
 
@@ -72,6 +105,7 @@ def detect_red_dots_in_line():
     # Release the webcam and close any open windows
     cap.release()
     cv2.destroyAllWindows()
+    client.disconnect()
 
 # Call the function
 detect_red_dots_in_line()
