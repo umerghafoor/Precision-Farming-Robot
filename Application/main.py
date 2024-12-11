@@ -1,21 +1,27 @@
+import base64
 import os
 import sys
 import cv2
 import json
+import numpy as np
 import paho.mqtt.client as mqtt
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
-    QLabel, QSlider, QRadioButton, QGridLayout, QFrame,
+    QLabel, QSlider, QGridLayout, QFrame,
 )
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt, QTimer, QSize
 from PyQt6.QtGui import QImage, QPixmap, QIcon
 
 # MQTT Configuration Constants
 MQTT_BROKER_IP = "192.168.18.29"  # Replace with your MQTT broker IP
 MQTT_PORT = 1883                  # Default MQTT port
 MQTT_TOPIC = "robot/control"      # Topic to publish commands
+MQTT_TOPIC_SUB = "video/stream"      # Topic to publish commands
 MQTT_USERNAME = None              # Optional: replace with username if authentication is required
 MQTT_PASSWORD = None              # Optional: replace with password if authentication is required
+
+
+icon_size = 50  # Change this size as needed
 
 class RobotCarControlApp(QWidget):
     def __init__(self):
@@ -28,12 +34,36 @@ class RobotCarControlApp(QWidget):
 
         # MQTT Client setup
         self.mqtt_client = mqtt.Client()
+        self.mqtt_client.on_message = self.on_message
         if MQTT_USERNAME and MQTT_PASSWORD:
             self.mqtt_client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
         self.mqtt_client.connect(MQTT_BROKER_IP, MQTT_PORT)
         
+        self.mqtt_client.subscribe(MQTT_TOPIC_SUB)
+        
+        # Start the MQTT loop in a separate thread
+        self.mqtt_client.loop_start()
+        
         self.last_message = ""
         self.is_auto_mode = False
+        
+        
+        # Callback function for receiving messages
+    def on_message(self, mqtt_client, userdata, msg):
+        jpeg_data = base64.b64decode(msg.payload)
+        np_array = np.frombuffer(jpeg_data, dtype=np.uint8)
+        self.frame = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+
+    def update_frame(self):
+        # If the frame is received from MQTT
+        if hasattr(self, 'frame') and self.frame is not None:
+            # Convert the frame from BGR to RGB
+            frame_rgb = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
+            height, width, channel = frame_rgb.shape
+            step = channel * width
+            q_img = QImage(frame_rgb.data, width, height, step, QImage.Format_RGB888)
+            self.video_label.setPixmap(QPixmap.fromImage(q_img))
+
 
     def init_ui(self):
         # Main layout
@@ -60,12 +90,16 @@ class RobotCarControlApp(QWidget):
         
                 # set icons for the buttons up.png
         self.up_button.setIconSize(self.up_button.size())
+        self.up_button.setIconSize(QSize(icon_size, icon_size))
         self.up_button.setIcon(QIcon(os.path.join(os.path.dirname(__file__), "up.png")))
         self.down_button.setIconSize(self.down_button.size())
+        self.down_button.setIconSize(QSize(icon_size, icon_size))
         self.down_button.setIcon(QIcon(QIcon(os.path.join(os.path.dirname(__file__),"down.png"))))
         self.left_button.setIconSize(self.left_button.size())
+        self.left_button.setIconSize(QSize(icon_size, icon_size))
         self.left_button.setIcon(QIcon(QIcon(os.path.join(os.path.dirname(__file__),"left.png"))))
         self.right_button.setIconSize(self.right_button.size())
+        self.right_button.setIconSize(QSize(icon_size, icon_size))
         self.right_button.setIcon(QIcon(QIcon(os.path.join(os.path.dirname(__file__),"right.png"))))
 
 
@@ -135,6 +169,7 @@ class RobotCarControlApp(QWidget):
             step = channel * width
             q_img = QImage(frame.data, width, height, step, QImage.Format.Format_RGB888)
             self.video_label.setPixmap(QPixmap.fromImage(q_img))
+            
 
     def send_command(self, command):
         speed = self.velocity_slider.value()

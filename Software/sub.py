@@ -4,7 +4,7 @@ import base64
 import numpy as np
 
 # MQTT configuration
-broker_address = "192.168.240.180"
+broker_address = "192.168.18.29"
 port = 1883
 topic = "video/stream"
 

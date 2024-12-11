@@ -15,7 +15,7 @@ def return_angle(cx, width):
     angle = np.arctan(x / DISTANCE)
     # Convert radians to degrees
     angle = np.degrees(angle)
-    return angle
+    return int(angle) + 90
 
 def detect_red_dots_in_line():
     # Initialize the MQTT client

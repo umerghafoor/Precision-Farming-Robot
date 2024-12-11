@@ -1,83 +1,107 @@
-/* Set the background color of the entire application */
+/* Global Application Styling */
 QWidget {
-    background-color: #FFFFFF;
-    color: #000000;
+    background-color: #1E1E2E; /* Dark modern background */
+    color: #ECEFF4; /* Light text for contrast */
+    font-family: "Segoe UI", sans-serif; /* Clean and modern font */
+    font-size: 14px;
 }
 
-/* Set the color for buttons */
+/* Buttons Styling */
 QPushButton {
-    background-color: #FFFFFF;
-    color: #FFFFFF;
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 #3A3A55, stop:1 #232334);
+    color: #ECEFF4;
+    border: 1px solid #4C566A;
+    border-radius: 6px; /* Rounded corners */
+    padding: 6px 12px;
 }
 
 QPushButton:hover {
-    background-color: #333333;
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 #4F4F6E, stop:1 #2B2B3F);
 }
 
 QPushButton:pressed {
-    background-color: #666666;
+    background-color: #2B2B3F;
 }
 
-/* Set the color for text fields */
+/* Text Fields Styling */
 QLineEdit, QTextEdit {
-    background-color: #000000;
-    color: #FFFFFF;
-    border: 1px solid #FFFFFF;
+    background-color: #2E3440;
+    color: #ECEFF4;
+    border: 1px solid #4C566A;
+    border-radius: 4px;
+    padding: 4px;
 }
 
-/* Set the color for labels */
+/* Labels Styling */
 QLabel {
-    color: #FFFFFF;
+    color: #ECEFF4;
+    font-weight: bold;
 }
 
-/* Set the color for combo boxes */
+/* ComboBox Styling */
 QComboBox {
-    background-color: #000000;
-    color: #FFFFFF;
-    border: 1px solid #FFFFFF;
+    background-color: #2E3440;
+    color: #ECEFF4;
+    border: 1px solid #4C566A;
+    border-radius: 4px;
+    padding: 2px 6px;
 }
 
 QComboBox QAbstractItemView {
-    background-color: #000000;
-    color: #FFFFFF;
-    selection-background-color: #333333;
+    background-color: #2E3440;
+    color: #ECEFF4;
+    selection-background-color: #4C566A;
+    border: 1px solid #4C566A;
 }
 
-/* Set the color for progress bars */
+/* Progress Bar Styling */
 QProgressBar {
-    background-color: #000000;
-    color: #FFFFFF;
-    border: 1px solid #FFFFFF;
+    background-color: #2E3440;
+    color: #ECEFF4;
+    border: 1px solid #4C566A;
+    border-radius: 4px;
+    text-align: center;
 }
 
 QProgressBar::chunk {
-    background-color: #FFFFFF;
+    background-color: #5E81AC;
+    border-radius: 4px;
 }
 
-/* Set the color for checkboxes */
+/* Checkbox Styling */
 QCheckBox {
-    color: #FFFFFF;
+    color: #ECEFF4;
+    spacing: 6px;
 }
 
 QCheckBox::indicator {
-    background-color: #000000;
-    border: 1px solid #FFFFFF;
+    width: 16px;
+    height: 16px;
+    background-color: #2E3440;
+    border: 1px solid #4C566A;
+    border-radius: 3px;
 }
 
 QCheckBox::indicator:checked {
-    background-color: #FFFFFF;
+    background-color: #5E81AC;
+    border: 1px solid #5E81AC;
 }
 
-/* Set the color for radio buttons */
+/* Radio Button Styling */
 QRadioButton {
-    color: #FFFFFF;
+    color: #ECEFF4;
+    spacing: 6px;
 }
 
 QRadioButton::indicator {
-    background-color: #000000;
-    border: 1px solid #FFFFFF;
+    width: 16px;
+    height: 16px;
+    background-color: #2E3440;
+    border: 1px solid #4C566A;
+    border-radius: 8px;
 }
 
 QRadioButton::indicator:checked {
-    background-color: #FFFFFF;
+    background-color: #5E81AC;
+    border: 1px solid #5E81AC;
 }

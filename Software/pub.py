@@ -3,7 +3,7 @@ import paho.mqtt.client as mqtt
 import base64
 
 # MQTT configuration
-broker_address = "192.168.240.180"  # Replace with your Mosquitto broker address
+broker_address = "192.168.18.29"  # Replace with your Mosquitto broker address
 port = 1883
 topic = "video/stream"
 
