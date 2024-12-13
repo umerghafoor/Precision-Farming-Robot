@@ -47,22 +47,20 @@ class RobotCarControlApp(QWidget):
         self.last_message = ""
         self.is_auto_mode = False
         
+        # Initialize the MQTT client
+        self.userdata = {'frame': None}  # Create a shared dictionary to store the frame
         
-        # Callback function for receiving messages
-    def on_message(self, mqtt_client, userdata, msg):
+        
+    def on_message(self, client, userdata, msg):
         jpeg_data = base64.b64decode(msg.payload)
         np_array = np.frombuffer(jpeg_data, dtype=np.uint8)
-        self.frame = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
-
-    def update_frame(self):
-        # If the frame is received from MQTT
-        if hasattr(self, 'frame') and self.frame is not None:
-            # Convert the frame from BGR to RGB
-            frame_rgb = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
+        frame = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+        if frame is not None:
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             height, width, channel = frame_rgb.shape
-            step = channel * width
-            q_img = QImage(frame_rgb.data, width, height, step, QImage.Format_RGB888)
+            q_img = QImage(frame_rgb.data, width, height, channel * width, QImage.Format.Format_RGB888)
             self.video_label.setPixmap(QPixmap.fromImage(q_img))
+
 
 
     def init_ui(self):
@@ -162,14 +160,15 @@ class RobotCarControlApp(QWidget):
             print("QSS file not found. Using default styles.")
 
     def update_frame(self):
-        ret, frame = self.capture.read()
-        if ret:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            height, width, channel = frame.shape
+        if self.userdata['frame'] is not None:
+            # Retrieve the latest frame
+            frame = self.userdata['frame']
+            # Convert the frame from BGR to RGB
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            height, width, channel = frame_rgb.shape
             step = channel * width
-            q_img = QImage(frame.data, width, height, step, QImage.Format.Format_RGB888)
+            q_img = QImage(frame_rgb.data, width, height, step, QImage.Format_RGB888)
             self.video_label.setPixmap(QPixmap.fromImage(q_img))
-            
 
     def send_command(self, command):
         speed = self.velocity_slider.value()
@@ -225,6 +224,7 @@ class RobotCarControlApp(QWidget):
         self.is_auto_mode = not self.is_auto_mode
         self.send_command(self.last_message)
         print("Auto button clicked: Switching to AUTO mode")
+
 
 
 if __name__ == "__main__":
