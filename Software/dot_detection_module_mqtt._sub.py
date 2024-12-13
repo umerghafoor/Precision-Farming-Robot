@@ -7,7 +7,7 @@ import json
 # Constants
 DISTANCE = 10
 SCALAR = 30
-BROKER = "192.168.18.29"  # Replace with your MQTT broker address
+BROKER = "192.168.240.180"  # Replace with your MQTT broker address
 PORT = 1883  # MQTT broker port
 TOPIC_VIDEO = "video/stream"  # Topic for video stream
 TOPIC_CONTROL = "robot/control"  # Topic for control messages
