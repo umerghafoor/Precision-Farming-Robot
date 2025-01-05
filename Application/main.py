@@ -7,7 +7,7 @@ import numpy as np
 import paho.mqtt.client as mqtt
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
-    QLabel, QSlider, QGridLayout, QFrame,
+    QLabel, QSlider, QGridLayout, QFrame,QDial
 )
 from PyQt6.QtCore import Qt, QTimer, QSize
 from PyQt6.QtGui import QImage, QPixmap, QIcon
@@ -31,6 +31,9 @@ class RobotCarControlApp(QWidget):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(30)
+
+        self.command_timer = QTimer(self)
+        self.command_timer.timeout.connect(self.send_last_command)
 
         # MQTT Client setup
         self.mqtt_client = mqtt.Client()
@@ -79,14 +82,22 @@ class RobotCarControlApp(QWidget):
         self.down_button = QPushButton("\u2193")
         self.left_button = QPushButton("\u2190")
         self.right_button = QPushButton("\u2192")
+        self.upleft_button = QPushButton("\u2196")
+        self.upright_button = QPushButton("\u2197")
+        self.downleft_button = QPushButton("\u2199")
+        self.downright_button = QPushButton("\u2198")
 
         # Settings for the buttons
         self.up_button.setFixedSize(60, 60)
         self.down_button.setFixedSize(60, 60)
         self.left_button.setFixedSize(60, 60)
         self.right_button.setFixedSize(60, 60)
+        self.upleft_button.setFixedSize(60, 60)
+        self.upright_button.setFixedSize(60, 60)
+        self.downleft_button.setFixedSize(60, 60)
+        self.downright_button.setFixedSize(60, 60)
         
-                # set icons for the buttons up.png
+        # set icons for the buttons up.png
         self.up_button.setIconSize(self.up_button.size())
         self.up_button.setIconSize(QSize(icon_size, icon_size))
         self.up_button.setIcon(QIcon(os.path.join(os.path.dirname(__file__), "up.png")))
@@ -99,12 +110,27 @@ class RobotCarControlApp(QWidget):
         self.right_button.setIconSize(self.right_button.size())
         self.right_button.setIconSize(QSize(icon_size, icon_size))
         self.right_button.setIcon(QIcon(QIcon(os.path.join(os.path.dirname(__file__),"right.png"))))
-
-
+        self.upleft_button.setIconSize(self.upleft_button.size())
+        self.upleft_button.setIconSize(QSize(icon_size, icon_size))
+        self.upleft_button.setIcon(QIcon(QIcon(os.path.join(os.path.dirname(__file__),"upleft.png"))))
+        self.upright_button.setIconSize(self.upright_button.size())
+        self.upright_button.setIconSize(QSize(icon_size, icon_size))
+        self.upright_button.setIcon(QIcon(QIcon(os.path.join(os.path.dirname(__file__),"upright.png"))))
+        self.downleft_button.setIconSize(self.downleft_button.size())
+        self.downleft_button.setIconSize(QSize(icon_size, icon_size))
+        self.downleft_button.setIcon(QIcon(QIcon(os.path.join(os.path.dirname(__file__),"downleft.png"))))
+        self.downright_button.setIconSize(self.downright_button.size())
+        self.downright_button.setIconSize(QSize(icon_size, icon_size))
+        self.downright_button.setIcon(QIcon(QIcon(os.path.join(os.path.dirname(__file__),"downright.png"))))
+                                      
         dpad_layout.addWidget(self.up_button, 0, 1)
         dpad_layout.addWidget(self.down_button, 2, 1)
         dpad_layout.addWidget(self.left_button, 1, 0)
         dpad_layout.addWidget(self.right_button, 1, 2)
+        dpad_layout.addWidget(self.upleft_button, 0, 0)
+        dpad_layout.addWidget(self.upright_button, 0, 2)
+        dpad_layout.addWidget(self.downleft_button, 2, 0)
+        dpad_layout.addWidget(self.downright_button, 2, 2)
 
         # Action buttons
         action_buttons_layout = QVBoxLayout()
@@ -119,22 +145,56 @@ class RobotCarControlApp(QWidget):
         action_buttons_layout.addWidget(self.auto_button)
 
         # Velocity slider and mode
-        self.velocity_slider = QSlider(Qt.Orientation.Horizontal)
+        self.velocity_slider = QSlider(Qt.Orientation.Vertical)
         self.velocity_slider.setRange(0, 255)
         self.velocity_slider.setValue(50)
+        self.velocity_slider.setFixedWidth(24)
+
+        self.stearAngle_slider = QDial()
+        self.stearAngle_slider.setRange(0, 90)
+        self.stearAngle_slider.setValue(0)
+        self.stearAngle_slider.setNotchesVisible(True)
+        self.stearAngle_slider.setNotchTarget(5)
+        self.stearAngle_slider.setWrapping(False)
+
+        # self.up_button.clicked.connect(self.up_button_clicked)
+        # self.down_button.clicked.connect(self.down_button_clicked)
+        # self.left_button.clicked.connect(self.left_button_clicked)
+        # self.right_button.clicked.connect(self.right_button_clicked)
+        # self.upleft_button.clicked.connect(self.upleft_button_clicked)
+        # self.upright_button.clicked.connect(self.upright_button_clicked)
+        # self.downleft_button.clicked.connect(self.downleft_button_clicked)
+        # self.downright_button.clicked.connect(self.downright_button_clicked)
 
         # Connect signals
-        self.up_button.clicked.connect(self.up_button_clicked)
-        self.down_button.clicked.connect(self.down_button_clicked)
-        self.left_button.clicked.connect(self.left_button_clicked)
-        self.right_button.clicked.connect(self.right_button_clicked)
+        self.up_button.pressed.connect(lambda: self.start_continuous_command("FORWARD"))
+        self.up_button.released.connect(self.stop_continuous_command)
+        self.down_button.pressed.connect(lambda: self.start_continuous_command("BACKWARD"))
+        self.down_button.released.connect(self.stop_continuous_command)
+        self.left_button.pressed.connect(lambda: self.start_continuous_command("LEFT"))
+        self.left_button.released.connect(self.stop_continuous_command)
+        self.right_button.pressed.connect(lambda: self.start_continuous_command("RIGHT"))
+        self.right_button.released.connect(self.stop_continuous_command)
+        self.upleft_button.pressed.connect(lambda: self.start_continuous_command("FORWARD_LEFT"))
+        self.upleft_button.released.connect(self.stop_continuous_command)
+        self.upright_button.pressed.connect(lambda: self.start_continuous_command("FORWARD_RIGHT"))
+        self.upright_button.released.connect(self.stop_continuous_command)
+        self.downleft_button.pressed.connect(lambda: self.start_continuous_command("BACKWARD_LEFT"))
+        self.downleft_button.released.connect(self.stop_continuous_command)
+        self.downright_button.pressed.connect(lambda: self.start_continuous_command("BACKWARD_RIGHT"))
+        self.downright_button.released.connect(self.stop_continuous_command)
+
         self.stop_button.clicked.connect(self.stop_button_clicked)
         self.velocity_slider.valueChanged.connect(self.adjust_velocity)
+        self.stearAngle_slider.valueChanged.connect(self.adjust_stearAngle)
 
         # Add widgets to controls layout
         controls_layout.addLayout(dpad_layout)
-        controls_layout.addLayout(action_buttons_layout)
-        controls_layout.addWidget(self.velocity_slider)
+        action_buttons_layout.addWidget(self.stearAngle_slider)
+        othercontrols_layout = QHBoxLayout()
+        othercontrols_layout.addWidget(self.velocity_slider)
+        othercontrols_layout.addLayout(action_buttons_layout)
+        controls_layout.addLayout(othercontrols_layout)
 
         # Right panel (Video Feed)
         self.video_label = QLabel()
@@ -151,6 +211,20 @@ class RobotCarControlApp(QWidget):
 
         # Load QSS Stylesheet
         self.load_stylesheet()
+    
+    def send_last_command(self):
+        if not self.is_auto_mode:
+            self.send_command(self.last_message)
+
+    def start_continuous_command(self, command):
+        self.last_message = command
+        if not self.is_auto_mode:
+            self.command_timer.start(10)
+        else:
+            self.send_command(self.last_message)
+
+    def stop_continuous_command(self):
+        self.command_timer.stop()
 
     def load_stylesheet(self):
         try:
@@ -172,9 +246,11 @@ class RobotCarControlApp(QWidget):
 
     def send_command(self, command):
         speed = self.velocity_slider.value()
+        stearAngle = self.stearAngle_slider.value()
         message = {
             "command": command,
             "speed": speed,
+            "stearAngle": stearAngle,
             "continuous": self.is_auto_mode
         }
         self.mqtt_client.publish(MQTT_TOPIC, json.dumps(message))
@@ -184,49 +260,34 @@ class RobotCarControlApp(QWidget):
         self.send_command(self.last_message)
         print(f"Velocity Adjusted: ")
 
+    def adjust_stearAngle(self):
+        print(f"StearAngle Adjusted: ")
+
     def closeEvent(self, event):
         self.capture.release()
         self.mqtt_client.disconnect()  # Disconnect MQTT client
         super().closeEvent(event)
 
-    def up_button_clicked(self):
-        """Handles the up button click."""
-        self.send_command("FORWARD")
-        self.last_message = "FORWARD"
-        print("Up button clicked: Moving FORWARD")
-
-    def down_button_clicked(self):
-        """Handles the down button click."""
-        self.send_command("BACKWARD")
-        self.last_message = "BACKWARD"
-        print("Down button clicked: Moving BACKWARD")
-
-    def left_button_clicked(self):
-        """Handles the left button click."""
-        self.send_command("LEFT")
-        self.last_message = "LEFT"
-        print("Left button clicked: Turning LEFT")
-
-    def right_button_clicked(self):
-        """Handles the right button click."""
-        self.send_command("RIGHT")
-        self.last_message = "RIGHT"
-        print("Right button clicked: Turning RIGHT")
-
+    def auto_button_clicked(self):
+        """Handles the auto button click."""
+        self.is_auto_mode = not self.is_auto_mode
+        self.send_command(self.last_message)
+        # change button appearance based on the mode
+        if self.is_auto_mode:
+            self.auto_button.setStyleSheet("background-color: green;")
+            self.auto_button.setText("Auto Mode ON")
+        else:
+            self.auto_button.setStyleSheet("")
+            self.auto_button.setText("Auto Mode OFF")
+        
+        print("Auto button clicked: Switching to AUTO mode")
+    
     def stop_button_clicked(self):
         """Handles the stop button click."""
         self.send_command("STOP")
         self.last_message = "STOP"
         print("Stop button clicked: Stopping the robot")
-
-    def auto_button_clicked(self):
-        """Handles the auto button click."""
-        self.is_auto_mode = not self.is_auto_mode
-        self.send_command(self.last_message)
-        print("Auto button clicked: Switching to AUTO mode")
-
-
-
+    
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = RobotCarControlApp()

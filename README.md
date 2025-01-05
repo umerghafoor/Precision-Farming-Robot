@@ -116,37 +116,63 @@ Control the robot using the following MQTT commands.
 .\mosquitto_sub.exe -t robot/control -h <BROKER_IP>
 ```
 
+---
+
 #### 1. **Forward Movement**
 
 ```json
-{"command": "FORWARD", "speed": 100, "continuous": true}
+{"command": "FORWARD", "speed": 100, "continuous": true, "stearAngle": 0}
 ```
 
 #### 2. **Backward Movement**
 
 ```json
-{"command": "BACKWARD", "speed": 100, "continuous": true}
+{"command": "BACKWARD", "speed": 100, "continuous": true, "stearAngle": 0}
 ```
 
-#### 3. **Turning Left**
+#### 3. **Rotate Left**
 
 ```json
-{"command": "LEFT", "speed": 100, "continuous": true}
+{"command": "LEFT", "speed": 100, "continuous": true, "stearAngle": 0}
 ```
 
-#### 4. **Turning Right**
+#### 4. **Rotate Right**
 
 ```json
-{"command": "RIGHT", "speed": 100, "continuous": true}
+{"command": "RIGHT", "speed": 100, "continuous": true, "stearAngle": 0}
 ```
 
-#### 5. **Stopping the Motors**
+#### 5. **Turning Forward Right**
+
+```json
+{"command": "FORWARD_RIGHT", "speed": 100, "continuous": true, "stearAngle": 30}
+```
+
+#### 6. **Turning Forward Left**
+
+```json
+{"command": "FORWARD_LEFT", "speed": 100, "continuous": true, "stearAngle": 30}
+```
+
+#### 7. **Turning Backward Left**
+
+```json
+{"command": "BACKWARD_LEFT", "speed": 100, "continuous": true, "stearAngle": 30}
+```
+
+#### 8. **Turning Backward Right**
+
+```json
+{"command": "BACKWARD_RIGHT", "speed": 100, "continuous": true, "stearAngle": 30}
+```
+
+#### 9. **Stopping the Motors**
 
 ```json
 {"command": "STOP"}
 ```
 
-#### 6. **Controlling the Servo**
+#### 10. **Controlling the Servo**
 
 ```json
 {"command": "SERVO", "angle": 45}
