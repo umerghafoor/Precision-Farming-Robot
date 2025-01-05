@@ -4,6 +4,7 @@
 
 Direction currentDirection = STOP;
 int currentSpeed = 255;
+int currentAngle = 0;
 
 Servo myServo;
 
@@ -35,45 +36,74 @@ void setup_actuaters() {
 
 }
 
-void executeCommand(String command, int speed, int angle, bool continuous) {
+void executeCommand(String command, int speed, int angle, int stearAngle, bool continuous) {
     // Execute commands based on JSON input
-    if (command == "FORWARD") {
+    switch (command) {
+      case "FORWARD":
         moveForward(speed);
-        if (continuous) {
-            isMoving = continuous;
-            currentDirection = FORWARD;
-            currentSpeed = speed;
-        }
-    } else if (command == "BACKWARD") {
+        isMoving = continuous;
+        currentDirection = FORWARD;
+        currentSpeed = speed;
+        break;
+      case "BACKWARD":
         moveBackward(speed);
-        if (continuous) {
-            isMoving = continuous;
-            currentDirection = BACKWARD;
-            currentSpeed = speed;
-        }
-    } else if (command == "LEFT") {
+        isMoving = continuous;
+        currentDirection = BACKWARD;
+        currentSpeed = speed;
+        break;
+      case "LEFT":
         turnLeft(speed);
-        if (continuous) {
-            isMoving = continuous;
-            currentDirection = LEFT;
-            currentSpeed = speed;
-        }
-    } else if (command == "RIGHT") {
+        isMoving = continuous;
+        currentDirection = LEFT;
+        currentSpeed = speed;
+        break;
+      case "RIGHT":
         turnRight(speed);
-        if (continuous) {
-            isMoving = continuous;
-            currentDirection = RIGHT;
-            currentSpeed = speed;
-        }
-    } else if (command == "STOP") {
+        isMoving = continuous;
+        currentDirection = RIGHT;
+        currentSpeed = speed;
+        break;
+      case "STOP":
         stopMotors();
         isMoving = 0;
-    } else if (command == "SERVO") {
+        break;
+      case "FORWARD_LEFT":
+        moveForwardLeft(speed);
+        isMoving = continuous;
+        currentDirection = FORWARD_LEFT;
+        currentSpeed = speed;
+        currentAngle = stearAngle;
+        break;
+      case "FORWARD_RIGHT":
+      moveForwardRight(speed);
+        isMoving = continuous;
+        currentDirection = FORWARD_RIGHT;
+        currentSpeed = speed;
+        currentAngle = stearAngle;
+        break;
+      case "BACKWARD_LEFT":
+        moveBackwardLeft(speed);
+        isMoving = continuous;
+        currentDirection = BACKWARD_LEFT;
+        currentSpeed = speed;
+        currentAngle = stearAngle;
+        break;
+      case "BACKWARD_RIGHT":
+        moveBackwardRight(speed);
+        isMoving = continuous;
+        currentDirection = BACKWARD_RIGHT;
+        currentSpeed = speed;
+        currentAngle = stearAngle;
+        break;
+      case "SERVO":
         myServo.write(angle);
         Serial.println("Servo moved to: " + String(angle));
-    } else {
+        break;
+      default:
         Serial.println("Unknown command: " + command);
+        break;
     }
+    delay(500);
 }
 
 
@@ -94,6 +124,20 @@ void controlRobot() {
         break;
       case STOP:
         stopMotors();
+        break;
+      case FORWARD_LEFT:
+        moveForwardLeft(currentSpeed);
+        break;
+      case FORWARD_RIGHT:
+        moveForwardRight(currentSpeed);
+        break;
+      case BACKWARD_LEFT:
+        moveBackwardLeft(currentSpeed);
+        break;
+      case BACKWARD_RIGHT:
+        moveBackwardRight(currentSpeed);
+        break;
+      default:
         break;
     }
   }
@@ -219,4 +263,111 @@ void stopMotors() {
   digitalWrite(IN4_M4, LOW);
 
   Serial.println("Motors stopped");
+}
+
+void moveForwardLeft(int speed)
+{
+  int strearingFactor = currentAngle/90;
+  int leftSpeed = speed - (speed * strearingFactor);
+  // Motor 1
+  analogWrite(ENA_M1, speed);
+  digitalWrite(IN1_M1, HIGH);
+  digitalWrite(IN2_M1, LOW);
+
+  // Motor 2
+  analogWrite(ENB_M2, leftSpeed);
+  digitalWrite(IN3_M2, HIGH);
+  digitalWrite(IN4_M2, LOW);
+
+  // Motor 3
+  analogWrite(ENA_M3, speed);
+  digitalWrite(IN1_M3, HIGH);
+  digitalWrite(IN2_M3, LOW);
+
+  // Motor 4
+  analogWrite(ENB_M4, leftSpeed);
+  digitalWrite(IN3_M4, LOW);
+  digitalWrite(IN4_M4, HIGH);
+
+  Serial.println("Moving forward left at speed: " + String(speed));
+}
+
+void moveForwardRight(int speed){
+  int strearingFactor = currentAngle/90;
+  int rightSpeed = speed - (speed * strearingFactor);
+  // Motor 1
+  analogWrite(ENA_M1, rightSpeed);
+  digitalWrite(IN1_M1, HIGH);
+  digitalWrite(IN2_M1, LOW);
+
+  // Motor 2
+  analogWrite(ENB_M2, speed);
+  digitalWrite(IN3_M2, HIGH);
+  digitalWrite(IN4_M2, LOW);
+
+  // Motor 3
+  analogWrite(ENA_M3, rightSpeed);
+  digitalWrite(IN1_M3, HIGH);
+  digitalWrite(IN2_M3, LOW);
+
+  // Motor 4
+  analogWrite(ENB_M4, speed);
+  digitalWrite(IN3_M4, LOW);
+  digitalWrite(IN4_M4, HIGH);
+
+  Serial.println("Moving forward right at speed: " + String(speed));
+}
+
+void moveBackwardLeft(int speed)
+{
+  int strearingFactor = currentAngle/90;
+  int leftSpeed = speed - (speed * strearingFactor);
+  // Motor 1
+  analogWrite(ENA_M1, speed);
+  digitalWrite(IN1_M1, LOW);
+  digitalWrite(IN2_M1, HIGH);
+
+  // Motor 2
+  analogWrite(ENB_M2, leftSpeed);
+  digitalWrite(IN3_M2, LOW);
+  digitalWrite(IN4_M2, HIGH);
+
+  // Motor 3
+  analogWrite(ENA_M3, speed);
+  digitalWrite(IN1_M3, LOW);
+  digitalWrite(IN2_M3, HIGH);
+
+  // Motor 4
+  analogWrite(ENB_M4, leftSpeed);
+  digitalWrite(IN3_M4, HIGH);
+  digitalWrite(IN4_M4, LOW);
+
+  Serial.println("Moving backward left at speed: " + String(speed));
+}
+
+void moveBackwardRight(int speed)
+{
+  int strearingFactor = currentAngle/90;
+  int rightSpeed = speed - (speed * strearingFactor);
+  // Motor 1
+  analogWrite(ENA_M1, rightSpeed);
+  digitalWrite(IN1_M1, LOW);
+  digitalWrite(IN2_M1, HIGH);
+
+  // Motor 2
+  analogWrite(ENB_M2, speed);
+  digitalWrite(IN3_M2, LOW);
+  digitalWrite(IN4_M2, HIGH);
+
+  // Motor 3
+  analogWrite(ENA_M3, rightSpeed);
+  digitalWrite(IN1_M3, LOW);
+  digitalWrite(IN2_M3, HIGH);
+
+  // Motor 4
+  analogWrite(ENB_M4, speed);
+  digitalWrite(IN3_M4, HIGH);
+  digitalWrite(IN4_M4, LOW);
+
+  Serial.println("Moving backward right at speed: " + String(speed));
 }

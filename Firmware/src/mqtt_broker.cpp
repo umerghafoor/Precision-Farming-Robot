@@ -56,9 +56,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
     String command = doc["command"] | "";
     int speed = doc["speed"] | 255;
     int angle = doc["angle"] | 90;
+    int stearAngle = doc["stearAngle"] | 0;
     bool continuous = doc["continuous"] | false;
 
-    executeCommand(command, speed, angle, continuous);
+    executeCommand(command, speed, angle,stearAngle, continuous);
 }
 
 void send_message(String message) {
