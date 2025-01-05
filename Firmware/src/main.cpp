@@ -3,6 +3,7 @@
 #include <mqtt_broker.h>
 
 void setup() {
+  Serial.begin(115200);
   setup_actuaters();
 
   setup_wifi();
@@ -16,6 +17,7 @@ void loop() {
   client.loop();
 
   controlRobot();
+  // stopMotors();
 
   send_message("Robot is moving in direction: ");
 

@@ -1,15 +1,21 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#define ENA 5
-#define IN1 7
-#define IN2 6
-#define ENB 10
-#define IN3 8
-#define IN4 9
+#define ENA_M1 21
+#define IN1_M1 22
+#define IN2_M1 23
+#define ENB_M2 5
+#define IN3_M2 18
+#define IN4_M2 19
+#define ENA_M3 15
+#define IN1_M3 0
+#define IN2_M3 2
+#define ENB_M4 17
+#define IN3_M4 16
+#define IN4_M4 4
 
 // Servo pin
-#define SERVO_PIN 23
+#define SERVO_PIN 32
 
 // LED pin for indication
 #define LED_PIN 2
