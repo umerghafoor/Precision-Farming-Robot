@@ -12,6 +12,8 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QTimer, QSize
 from PyQt6.QtGui import QImage, QPixmap, QIcon
 
+from ControllerWidget import ControllerWidget
+
 # MQTT Configuration Constants
 MQTT_BROKER_IP = "192.168.18.29"  # Replace with your MQTT broker IP
 MQTT_PORT = 1883                  # Default MQTT port
@@ -86,6 +88,23 @@ class RobotCarControlApp(QWidget):
         self.upright_button = QPushButton("\u2197")
         self.downleft_button = QPushButton("\u2199")
         self.downright_button = QPushButton("\u2198")
+
+        frame = QFrame(self)
+        frame.setFixedSize(200, 200)
+        frame.setFrameShape(QFrame.Shape.StyledPanel)
+
+        self.pygame_widget = ControllerWidget(width=180, height=180, anchor_radius=20, drag_radius=10, max_drag_distance=80)
+        self.pygame_widget.drag_info_signal.connect(self.controller_drag)
+        self.pygame_widget.set_anchor_color((236, 239, 244))
+        self.pygame_widget.set_drag_color((236, 239, 244))
+        self.pygame_widget.set_max_drag_circle_color((236, 239, 244))
+        self.pygame_widget.set_background_color( (30, 30, 46))
+        self.pygame_widget.set_outer_anchor_radius(10)
+        self.pygame_widget.set_center_anchor_radius(10)
+        self.pygame_widget.set_drag_line_thickness(18)
+
+        frame.setLayout(QVBoxLayout())
+        frame.layout().addWidget(self.pygame_widget)
 
         # Settings for the buttons
         self.up_button.setFixedSize(60, 60)
@@ -195,6 +214,7 @@ class RobotCarControlApp(QWidget):
         othercontrols_layout.addWidget(self.velocity_slider)
         othercontrols_layout.addLayout(action_buttons_layout)
         controls_layout.addLayout(othercontrols_layout)
+        controls_layout.addWidget(frame)
 
         # Right panel (Video Feed)
         self.video_label = QLabel()
@@ -225,6 +245,37 @@ class RobotCarControlApp(QWidget):
 
     def stop_continuous_command(self):
         self.command_timer.stop()
+
+    def controller_drag(self, drag_length, drag_angle):
+        """Handle the printed drag information in the required format."""
+        
+        stearAngle = 0
+
+        if 0 <= drag_angle < 90:
+            command = 'FORWARD_RIGHT'
+            stearAngle = 90 - int(drag_angle)
+        elif 90 <= drag_angle < 180:
+            command = 'FORWARD_LEFT'
+            stearAngle = int(drag_angle) - 90
+        elif -180 <= drag_angle < -90:
+            command = 'BACKWARD_LEFT'
+            stearAngle = 90 -( int(drag_angle) + 180)
+        else:
+            command = 'BACKWARD_RIGHT'
+            stearAngle = 90 + int(drag_angle)
+
+        # Calculate speed as a percentage of max drag distance
+        speed = int(drag_length / self.pygame_widget.max_drag_distance * 255)
+
+        message = {
+            "command": command,
+            "speed": speed,
+            "stearAngle": stearAngle,
+            "continuous": False
+        }
+
+        self.mqtt_client.publish(MQTT_TOPIC, json.dumps(message))
+        print(f"Command Sent: {message}")
 
     def load_stylesheet(self):
         try:

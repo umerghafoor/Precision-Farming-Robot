@@ -1,7 +1,7 @@
 /* Global Application Styling */
 QWidget {
-    background-color: #1E1E2E; /* Dark modern background */
-    color: #ECEFF4; /* Light text for contrast */
+    background-color: #1e1e2e; /* Dark modern background */
+    color: #eceff4; /* Light text for contrast */
     font-family: "Segoe UI", sans-serif; /* Clean and modern font */
     font-size: 14px;
 }
