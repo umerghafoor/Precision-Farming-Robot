@@ -38,70 +38,58 @@ void setup_actuaters() {
 
 void executeCommand(String command, int speed, int angle, int stearAngle, bool continuous) {
     // Execute commands based on JSON input
-    switch (command) {
-      case "FORWARD":
+    if (command == "FORWARD") {
         moveForward(speed);
         isMoving = continuous;
         currentDirection = FORWARD;
         currentSpeed = speed;
-        break;
-      case "BACKWARD":
+    } else if (command == "BACKWARD") {
         moveBackward(speed);
         isMoving = continuous;
         currentDirection = BACKWARD;
         currentSpeed = speed;
-        break;
-      case "LEFT":
+    } else if (command == "LEFT") {
         turnLeft(speed);
         isMoving = continuous;
         currentDirection = LEFT;
         currentSpeed = speed;
-        break;
-      case "RIGHT":
+    } else if (command == "RIGHT") {
         turnRight(speed);
         isMoving = continuous;
         currentDirection = RIGHT;
         currentSpeed = speed;
-        break;
-      case "STOP":
+    } else if (command == "STOP") {
         stopMotors();
         isMoving = 0;
-        break;
-      case "FORWARD_LEFT":
+    } else if (command == "FORWARD_LEFT") {
         moveForwardLeft(speed);
         isMoving = continuous;
         currentDirection = FORWARD_LEFT;
         currentSpeed = speed;
         currentAngle = stearAngle;
-        break;
-      case "FORWARD_RIGHT":
-      moveForwardRight(speed);
+    } else if (command == "FORWARD_RIGHT") {
+        moveForwardRight(speed);
         isMoving = continuous;
         currentDirection = FORWARD_RIGHT;
         currentSpeed = speed;
         currentAngle = stearAngle;
-        break;
-      case "BACKWARD_LEFT":
+    } else if (command == "BACKWARD_LEFT") {
         moveBackwardLeft(speed);
         isMoving = continuous;
         currentDirection = BACKWARD_LEFT;
         currentSpeed = speed;
         currentAngle = stearAngle;
-        break;
-      case "BACKWARD_RIGHT":
+    } else if (command == "BACKWARD_RIGHT") {
         moveBackwardRight(speed);
         isMoving = continuous;
         currentDirection = BACKWARD_RIGHT;
         currentSpeed = speed;
         currentAngle = stearAngle;
-        break;
-      case "SERVO":
+    } else if (command == "SERVO") {
         myServo.write(angle);
         Serial.println("Servo moved to: " + String(angle));
-        break;
-      default:
+    } else {
         Serial.println("Unknown command: " + command);
-        break;
     }
     delay(500);
 }
