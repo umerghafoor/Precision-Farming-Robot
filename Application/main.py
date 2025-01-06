@@ -3,6 +3,7 @@ import os
 import sys
 import cv2
 import json
+import time
 import numpy as np
 import paho.mqtt.client as mqtt
 from PyQt6.QtWidgets import (
@@ -18,12 +19,12 @@ from ControllerWidget import ControllerWidget
 MQTT_BROKER_IP = "192.168.18.29"  # Replace with your MQTT broker IP
 MQTT_PORT = 1883                  # Default MQTT port
 MQTT_TOPIC = "robot/control"      # Topic to publish commands
-MQTT_TOPIC_SUB = "video/stream"      # Topic to publish commands
+MQTT_TOPIC_SUB = "video/stream"   # Topic to publish commands
 MQTT_USERNAME = None              # Optional: replace with username if authentication is required
 MQTT_PASSWORD = None              # Optional: replace with password if authentication is required
 
 
-icon_size = 50  # Change this size as needed
+icon_size = 50
 
 class RobotCarControlApp(QWidget):
     def __init__(self):
@@ -33,9 +34,6 @@ class RobotCarControlApp(QWidget):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(30)
-
-        self.command_timer = QTimer(self)
-        self.command_timer.timeout.connect(self.send_last_command)
 
         # MQTT Client setup
         self.mqtt_client = mqtt.Client()
@@ -52,9 +50,7 @@ class RobotCarControlApp(QWidget):
         self.last_message = ""
         self.is_auto_mode = False
         
-        # Initialize the MQTT client
-        self.userdata = {'frame': None}  # Create a shared dictionary to store the frame
-        
+        self.userdata = {'frame': None}
         
     def on_message(self, client, userdata, msg):
         jpeg_data = base64.b64decode(msg.payload)
@@ -66,18 +62,19 @@ class RobotCarControlApp(QWidget):
             q_img = QImage(frame_rgb.data, width, height, channel * width, QImage.Format.Format_RGB888)
             self.video_label.setPixmap(QPixmap.fromImage(q_img))
 
-
-
     def init_ui(self):
         # Main layout
         main_layout = QHBoxLayout()
 
         # Left panel (Controls)
         controls_frame = QFrame()
-        controls_frame.setFixedWidth(200)  # Fix the width of the left-hand side
+        controls_frame.setFixedWidth(200)
         controls_layout = QVBoxLayout()
         controls_frame.setLayout(controls_layout)
         dpad_layout = QGridLayout()
+
+        # check varibles
+        self.last_command = "STOP"
 
         # D-pad buttons with arrows
         self.up_button = QPushButton("\u2191")
@@ -176,15 +173,6 @@ class RobotCarControlApp(QWidget):
         self.stearAngle_slider.setNotchTarget(5)
         self.stearAngle_slider.setWrapping(False)
 
-        # self.up_button.clicked.connect(self.up_button_clicked)
-        # self.down_button.clicked.connect(self.down_button_clicked)
-        # self.left_button.clicked.connect(self.left_button_clicked)
-        # self.right_button.clicked.connect(self.right_button_clicked)
-        # self.upleft_button.clicked.connect(self.upleft_button_clicked)
-        # self.upright_button.clicked.connect(self.upright_button_clicked)
-        # self.downleft_button.clicked.connect(self.downleft_button_clicked)
-        # self.downright_button.clicked.connect(self.downright_button_clicked)
-
         # Connect signals
         self.up_button.pressed.connect(lambda: self.start_continuous_command("FORWARD"))
         self.up_button.released.connect(self.stop_continuous_command)
@@ -220,7 +208,6 @@ class RobotCarControlApp(QWidget):
         self.video_label = QLabel()
         self.video_label.setText("Video Feed")
         self.video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        # self.video_label.setStyleSheet("border: 1px solid black;")  # Optional border for clarity
 
         # Add layouts to main layout
         main_layout.addWidget(controls_frame)
@@ -232,19 +219,12 @@ class RobotCarControlApp(QWidget):
         # Load QSS Stylesheet
         self.load_stylesheet()
     
-    def send_last_command(self):
-        if not self.is_auto_mode:
-            self.send_command(self.last_message)
-
     def start_continuous_command(self, command):
-        self.last_message = command
-        if not self.is_auto_mode:
-            self.command_timer.start(10)
-        else:
-            self.send_command(self.last_message)
+        self.last_command = command
+        self.send_command(self.last_command, continuous=True)
 
     def stop_continuous_command(self):
-        self.command_timer.stop()
+        self.send_command(self.last_command, continuous=self.is_auto_mode)
 
     def controller_drag(self, drag_length, drag_angle):
         """Handle the printed drag information in the required format."""
@@ -271,11 +251,19 @@ class RobotCarControlApp(QWidget):
             "command": command,
             "speed": speed,
             "stearAngle": stearAngle,
-            "continuous": False
+            "continuous": True
         }
 
-        self.mqtt_client.publish(MQTT_TOPIC, json.dumps(message))
-        print(f"Command Sent: {message}")
+        if drag_length == 0:
+            message = self.last_message
+            message['continuous'] = self.is_auto_mode
+
+        current_time = time.time()
+        if not hasattr(self, '_last_message_time') or (current_time - self._last_message_time >= 0.3) or speed == 0:
+            self.mqtt_client.publish(MQTT_TOPIC, json.dumps(message))
+            print(f"Command Sent: {message}")
+            self._last_message_time = current_time
+            self.last_message = message
 
     def load_stylesheet(self):
         try:
@@ -295,21 +283,22 @@ class RobotCarControlApp(QWidget):
             q_img = QImage(frame_rgb.data, width, height, step, QImage.Format_RGB888)
             self.video_label.setPixmap(QPixmap.fromImage(q_img))
 
-    def send_command(self, command):
+    def send_command(self, command, continuous=False):
         speed = self.velocity_slider.value()
         stearAngle = self.stearAngle_slider.value()
         message = {
             "command": command,
             "speed": speed,
             "stearAngle": stearAngle,
-            "continuous": self.is_auto_mode
+            "continuous": continuous
         }
         self.mqtt_client.publish(MQTT_TOPIC, json.dumps(message))
         print(f"Command Sent: {message}")
 
     def adjust_velocity(self):
-        self.send_command(self.last_message)
-        print(f"Velocity Adjusted: ")
+        if self.is_auto_mode:
+            self.send_command(self.last_command,self.is_auto_mode)
+            print(f"Velocity Adjusted: ")
 
     def adjust_stearAngle(self):
         print(f"StearAngle Adjusted: ")
@@ -322,7 +311,7 @@ class RobotCarControlApp(QWidget):
     def auto_button_clicked(self):
         """Handles the auto button click."""
         self.is_auto_mode = not self.is_auto_mode
-        self.send_command(self.last_message)
+        self.send_command(self.last_command, continuous=self.is_auto_mode)
         # change button appearance based on the mode
         if self.is_auto_mode:
             self.auto_button.setStyleSheet("background-color: green;")
@@ -336,7 +325,7 @@ class RobotCarControlApp(QWidget):
     def stop_button_clicked(self):
         """Handles the stop button click."""
         self.send_command("STOP")
-        self.last_message = "STOP"
+        self.last_command = "STOP"
         print("Stop button clicked: Stopping the robot")
     
 if __name__ == "__main__":
