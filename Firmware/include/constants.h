@@ -21,13 +21,14 @@
 #define LED_PIN 2
 
 // MQTT Broker details
-#define MQTT_SERVER "192.168.240.180" // Replace with your broker's IP
+#define MQTT_SERVER "192.168.18.29" // Replace with your broker's IP
 #define MQTT_PORT 1883
 #define SUBSCRIBE_TOPIC "robot/control"
+#define SUBSCRIBE_TOPIC_Pointer "robot/pointer"
 #define PUBLISH_TOPIC "robot/status"
 
 // WiFi credentials
-#define SSID "Umer"
-#define PASSWORD "umerghafoor1"
+#define SSID "812 "
+#define PASSWORD "bawagsial69"
 
 #endif

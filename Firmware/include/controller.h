@@ -17,7 +17,8 @@ enum Direction {
 
 
 void setup_actuaters();
-void executeCommand(String command, int speed, int angle, int stearAngle, bool continuous);
+void executeCommandControls(String command, int speed, int stearAngle, bool continuous);
+void excuteCommandPointer(int angle);
 void controlRobot();
 void moveForward(int speed);
 void moveBackward(int speed);

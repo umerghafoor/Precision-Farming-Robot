@@ -30,6 +30,7 @@ void reconnect() {
     if (client.connect("ESP32_Robot")) {
       Serial.println("Connected to MQTT Broker!");
       client.subscribe(SUBSCRIBE_TOPIC);
+      client.subscribe(SUBSCRIBE_TOPIC_Pointer);
     } else {
       Serial.print("Failed, rc=");
       Serial.print(client.state());
@@ -52,14 +53,18 @@ void callback(char* topic, byte* payload, unsigned int length) {
         Serial.println(error.f_str());
         return;
     }
+    if (strcmp(topic, SUBSCRIBE_TOPIC) == 0){
+      String command = doc["command"] | "";
+      int speed = doc["speed"] | 255;
+      int stearAngle = doc["stearAngle"] | 0;
+      bool continuous = doc["continuous"] | false;
 
-    String command = doc["command"] | "";
-    int speed = doc["speed"] | 255;
-    int angle = doc["angle"] | 90;
-    int stearAngle = doc["stearAngle"] | 0;
-    bool continuous = doc["continuous"] | false;
-
-    executeCommand(command, speed, angle,stearAngle, continuous);
+      executeCommandControls(command, speed,stearAngle, continuous);
+    }
+    else if (strcmp(topic, SUBSCRIBE_TOPIC_Pointer) == 0){
+      int angle = doc["angle"] | 90;
+      excuteCommandPointer(angle);
+    }
 }
 
 void send_message(String message) {

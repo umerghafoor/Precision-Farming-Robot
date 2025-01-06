@@ -36,7 +36,7 @@ void setup_actuaters() {
 
 }
 
-void executeCommand(String command, int speed, int angle, int stearAngle, bool continuous) {
+void executeCommandControls(String command, int speed, int stearAngle, bool continuous) {
     // Execute commands based on JSON input
     if (command == "FORWARD") {
         moveForward(speed);
@@ -85,15 +85,17 @@ void executeCommand(String command, int speed, int angle, int stearAngle, bool c
         currentDirection = BACKWARD_RIGHT;
         currentSpeed = speed;
         currentAngle = stearAngle;
-    } else if (command == "SERVO") {
-        myServo.write(angle);
-        Serial.println("Servo moved to: " + String(angle));
     } else {
         Serial.println("Unknown command: " + command);
     }
-    delay(500);
+    // delay(500);
 }
 
+void excuteCommandPointer(int angle) 
+{
+    myServo.write(angle);
+    Serial.println("Servo moved to: " + String(angle));
+}
 
 void controlRobot() {
   if (isMoving) {
