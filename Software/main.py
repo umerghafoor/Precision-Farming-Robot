@@ -9,13 +9,16 @@ from dot_detection_module import detect_circles, detect_any_shape
 from aruco_mark_detection_module import detect_aruco_markers
 from utility import save_profile, load_profile, HSVControlWindow
 
-DISTANCE = 10
+DISTANCE = 27
 SCALAR = 30
 BROKER = "192.168.18.29"  # Replace with your MQTT broker address
 PORT = 1883  # MQTT broker port
-TOPIC = "robot/control"
+TOPIC = "robot/pointer"
 TOPIC_VIDEO = "video/stream" 
-DETECTION_MODE = "ARUCO"  # "CIRCLE", "SHAPE", "ARUCO"
+DETECTION_MODE = "CIRCLE"  # "CIRCLE", "SHAPE", "ARUCO"
+VIDEO_WIDTH = 640
+VIDEO_HEIGHT = 360
+
 
 frame = None
 
@@ -41,6 +44,11 @@ def on_message(client, userdata, msg):
     np_array = np.frombuffer(jpeg_data, dtype=np.uint8)
     frame = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
 
+def scale_frame(frame, target_width, target_height):
+    if frame is None:
+        return None
+    
+    return cv2.resize(frame, (target_width, target_height), interpolation=cv2.INTER_LINEAR)
 
 def my_camera_mode():
     app = QApplication([])
@@ -94,7 +102,7 @@ def my_camera_mode():
 
         cv2.rectangle(frame, (0, y_start), (width, y_end), (255, 0, 0), 2)
 
-        hsv_window.update_image(cv2.flip(frame, 1), mask)
+        hsv_window.update_image(cv2.flip(scale_frame(frame, VIDEO_WIDTH, VIDEO_HEIGHT), 1), scale_frame(mask, VIDEO_WIDTH, int(VIDEO_HEIGHT * strip_thickness_factor / 100)))
 
         key = cv2.waitKey(1) & 0xFF
         if key == ord('q'):
@@ -102,8 +110,6 @@ def my_camera_mode():
 
     cap.release()
     cv2.destroyAllWindows()
-
-
     app.exit()
 
 def my_camera_mode_stealth(lower_hsv, upper_hsv):
@@ -146,7 +152,7 @@ def mqtt_stream():
 
     while frame is None:
         pass
-    
+
     lower_hsv, upper_hsv = load_profile()
     if lower_hsv is not None and upper_hsv is not None:
         hsv_window.lower_h_slider.setValue(lower_hsv[0])
@@ -164,7 +170,7 @@ def mqtt_stream():
 
             lower_hsv, upper_hsv = hsv_window.get_hsv_values()
             strip_thickness_factor = hsv_window.strip_width_slider.value()
-            
+
             width, y_start, y_end, roi = get_calibartion_settings(frame, strip_thickness_factor)
             if DETECTION_MODE == "CIRCLE":
                 detected_circles, mask = detect_circles(roi, lower_hsv, upper_hsv)
@@ -175,18 +181,19 @@ def mqtt_stream():
                 if ids is not None:
                     print(f"Detected ArUco markers: {ids}")
                 mask = None
-                
+
 
             for cx, cy, radius in detected_circles:
                 cy += y_start
                 cv2.circle(frame, (cx, cy), radius, (0, 255, 0), 2)
                 print(f"Weed found at: ({cx}, {cy}), Radius: {radius}")
+
                 message = send_mqtt_message(width, cx)
                 print(f"Published MQTT message: {message}")
 
             cv2.rectangle(frame, (0, y_start), (width, y_end), (255, 0, 0), 2)
 
-            hsv_window.update_image(cv2.flip(frame, 1), mask)
+            hsv_window.update_image(cv2.flip(scale_frame(frame, VIDEO_WIDTH, VIDEO_HEIGHT), 1), scale_frame(mask, VIDEO_WIDTH, int(VIDEO_HEIGHT * strip_thickness_factor / 100)))
 
             key = cv2.waitKey(1) & 0xFF
             if key == ord('q'):
@@ -241,7 +248,8 @@ if __name__ == '__main__':
     client.subscribe(TOPIC_VIDEO)
     client.loop_start()
 
-    # my_camera_mode()
+    my_camera_mode()
     # my_camera_mode_stealth(np.array([169, 83, 121]), np.array([180, 156, 241]))
-    mqtt_stream()
+    # mqtt_stream()
+    # mqtt_stream_stealth(np.array([169, 83, 121]), np.array([180, 156, 241]))
     client.disconnect()
