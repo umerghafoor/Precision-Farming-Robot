@@ -84,6 +84,7 @@ class ControllerWidget(QWidget):
 
     def mouseReleaseEvent(self, event):
         self.dragging = False
+        self.drag_info_signal.emit(0, 0)
 
     def mouseMoveEvent(self, event):
         if self.dragging:
