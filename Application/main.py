@@ -224,7 +224,9 @@ class RobotCarControlApp(QWidget):
         self.send_command(self.last_command, continuous=True)
 
     def stop_continuous_command(self):
-        self.send_command(self.last_command, continuous=self.is_auto_mode)
+        # self.send_command(self.last_command, continuous=self.is_auto_mode)
+        if not self.is_auto_mode:
+            self.send_command("STOP")
 
     def controller_drag(self, drag_length, drag_angle):
         """Handle the printed drag information in the required format."""
@@ -257,6 +259,9 @@ class RobotCarControlApp(QWidget):
         if drag_length == 0:
             message = self.last_message
             message['continuous'] = self.is_auto_mode
+            if not self.is_auto_mode:
+                self.send_command("STOP")
+                return
 
         current_time = time.time()
         if not hasattr(self, '_last_message_time') or (current_time - self._last_message_time >= 0.3) or speed == 0:
