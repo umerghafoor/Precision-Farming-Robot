@@ -1,0 +1,14 @@
+site_name: Precision Farming Robot Documentation
+theme:
+  name: material
+
+nav:
+  - Home: index.md
+  - Features: Features.md
+  - Setup Instructions: Setup-Instructions.md
+
+repo_url: https://github.com/umerghafoor/Precision-Farming-Robot
+site_description: "Documentation for the Precision Farming Robot project, including setup instructions, features, and more."
+
+extra_css:
+  - css/custom.css
