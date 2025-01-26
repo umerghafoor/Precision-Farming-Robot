@@ -1,0 +1,45 @@
+# Python
+*.pyc
+*.pyo
+__pycache__/
+*.pdb
+
+# Virtual environment
+venv/
+*.venv/
+
+# ROS build and log directories
+build/
+install/
+log/
+
+# Python distribution packages
+*.egg-info/
+*.egg
+dist/
+
+# Temporary/Generated files
+*.log
+*.bak
+*.swp
+
+# PyCharm / IDEs
+.idea/
+
+# VSCode
+.vscode/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Ignore ROS workspace build, install, and log directories under src/application
+src/application/build/
+src/application/install/
+src/application/log/
+
+# Ignore other generated files inside application
+src/application/application/*.egg-info/
+src/application/application/*.log
+
+image_processing

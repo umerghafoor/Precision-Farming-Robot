@@ -1,0 +1,123 @@
+/* Global Application Styling */
+QWidget {
+    background-color: #1e1e2e; /* Dark modern background */
+    color: #eceff4; /* Light text for contrast */
+    font-family: "Segoe UI", sans-serif; /* Clean and modern font */
+    font-size: 14px;
+}
+
+/* Buttons Styling */
+QPushButton {
+    /* background-color: qlineargradient(spread:#5E81AC, x1:0, y1:0, x2:1, y2:1, stop:0 #3A3A55, stop:1 #232334); */
+    background-color: #3A3A55;
+    color: #ECEFF4;
+    border: 1px solid #4C566A;
+    border-radius: 6px; /* Rounded corners */
+    padding: 6px 12px;
+}
+
+QPushButton:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 #4F4F6E, stop:1 #2B2B3F);
+}
+
+QPushButton:pressed {
+    background-color: #2B2B3F;
+}
+
+/* Text Fields Styling */
+QLineEdit, QTextEdit {
+    background-color: #2E3440;
+    color: #ECEFF4;
+    border: 1px solid #4C566A;
+    border-radius: 4px;
+    padding: 4px;
+}
+
+/* Labels Styling */
+QLabel {
+    color: #ECEFF4;
+    font-weight: bold;
+}
+
+/* ComboBox Styling */
+QComboBox {
+    background-color: #2E3440;
+    color: #ECEFF4;
+    border: 1px solid #4C566A;
+    border-radius: 4px;
+    padding: 2px 6px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #2E3440;
+    color: #ECEFF4;
+    selection-background-color: #4C566A;
+    border: 1px solid #4C566A;
+}
+
+/* Progress Bar Styling */
+QProgressBar {
+    background-color: #2E3440;
+    color: #ECEFF4;
+    border: 1px solid #4C566A;
+    border-radius: 4px;
+    text-align: center;
+}
+
+QProgressBar::chunk {
+    background-color: #5E81AC;
+    border-radius: 4px;
+}
+
+/* Checkbox Styling */
+QCheckBox {
+    color: #ECEFF4;
+    spacing: 6px;
+}
+
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    background-color: #2E3440;
+    border: 1px solid #4C566A;
+    border-radius: 3px;
+}
+
+QCheckBox::indicator:checked {
+    background-color: #5E81AC;
+    border: 1px solid #5E81AC;
+}
+
+/* Radio Button Styling */
+QRadioButton {
+    color: #ECEFF4;
+    spacing: 6px;
+}
+
+QRadioButton::indicator {
+    width: 16px;
+    height: 16px;
+    background-color: #2E3440;
+    border: 1px solid #4C566A;
+    border-radius: 8px;
+}
+
+QRadioButton::indicator:checked {
+    background-color: #5E81AC;
+    border: 1px solid #5E81AC;
+}
+
+
+QSlider::groove:vertical{
+    width: 16px;
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #e45757, stop:0.3 #e45757, stop:0.7 #1E1E2E, stop:1 #1E1E2E);
+    border-radius: 7px;
+}
+
+QSlider::handle:vertical{
+    background: #ffffff;
+    width: 24px;
+    height: 24px;
+    margin: 0 -2px;
+    border-radius: 11px;
+}

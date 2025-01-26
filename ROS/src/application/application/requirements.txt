@@ -1,0 +1,7 @@
+PyQt6
+opencv-python
+pygame
+rclpy
+numpy
+pyyaml
+pyserial
