@@ -1,0 +1,7 @@
+Cython
+numpy
+opencv-python
+pygame
+pyserial
+pyyaml
+setuptools
